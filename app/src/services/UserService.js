@@ -1,6 +1,6 @@
+import { Helper } from "../../helpers/helper.js";
 import { FirebaseDatabaseService } from "./FirebaseService/FirebaseDatabaseService.js";
 import { FirebaseStorageService } from "./FirebaseService/FirebaseStorageService.js";
-import { ref } from "firebase/storage";
 
 export class UserService {
     #firebase_db_instance;
@@ -36,12 +36,26 @@ export class UserService {
         }
     }
 
+    async getFiles(path){
+        return await FirebaseStorageService.getFiles(path);
+    }
+
+    async generateRandomImage(path){
+        const files = await FirebaseStorageService.getFiles(path);
+        const image_name = Helper.generateUniqueImageName();
+        while(files.some(file => file.name === image_name)){
+            image_name = Helper.generateUniqueImageName();
+        }
+        return image_name;
+    }
+
     async createUser(name,age,gender,country,profile,db_path,storage_path) {
         try{
             if(profile.files.length > 0) {
                 const file = profile.files[0];
-                const image_name = profile.files[0].name;
-                const path = storage_path + "/" + profile.files[0].name;
+                const storagePath = storage_path + "/";
+                const image_name = await this.generateRandomImage(storagePath);
+                const path = storage_path + "/" + image_name;
                 const url = await FirebaseStorageService.uploadAndgetURL(path,file);
                 const data = {
                     name,

@@ -1,5 +1,5 @@
 import { uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { ref , getStorage} from "firebase/storage";
+import { ref , getStorage , listAll} from "firebase/storage";
 import { initializeApp } from 'firebase/app';
 import { config } from "../../../config/config.js";
 
@@ -18,6 +18,16 @@ export class FirebaseStorageService {
             return url;
         } catch (error) {
             console.error("Error uploading and getting file URL:", error);
+            throw error;
+        }
+    }
+
+    static async getFiles(path) {
+        try {
+            const result = await listAll(FirebaseStorageService.getDatabaseRef(path));
+            return result.items;
+        } catch (error) {
+            console.error("Error listing files:", error);
             throw error;
         }
     }

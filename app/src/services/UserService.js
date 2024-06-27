@@ -36,11 +36,7 @@ export class UserService {
         }
     }
 
-    async getFiles(path){
-        return await FirebaseStorageService.getFiles(path);
-    }
-
-    async generateRandomImage(path){
+    async #generateRandomImage(path){
         const files = await FirebaseStorageService.getFiles(path);
         const image_name = Helper.generateUniqueImageName();
         while(files.some(file => file.name === image_name)){
@@ -54,7 +50,7 @@ export class UserService {
             if(profile.files.length > 0) {
                 const file = profile.files[0];
                 const storagePath = storage_path + "/";
-                const image_name = await this.generateRandomImage(storagePath);
+                const image_name = await this.#generateRandomImage(storagePath);
                 const path = storage_path + "/" + image_name;
                 const url = await FirebaseStorageService.uploadAndgetURL(path,file);
                 const data = {

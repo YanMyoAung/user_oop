@@ -156,6 +156,18 @@ input[type=text],input[type=number], input[type=file], select {
   font-weight: bold;
 }
 
+#message {
+  display: none;
+  padding: 10px;
+  margin: 10px 0;
+}
+#message.success {
+  color: green;
+}
+#message.error {
+  color: red;
+}
+
 .close:hover,
 .close:focus {
   color: #000;

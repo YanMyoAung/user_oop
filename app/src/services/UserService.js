@@ -38,7 +38,7 @@ export class UserService {
 
     async #generateRandomImage(path){
         const files = await FirebaseStorageService.getFiles(path);
-        const image_name = Helper.generateUniqueImageName();
+        let image_name = Helper.generateUniqueImageName();
         while(files.some(file => file.name === image_name)){
             image_name = Helper.generateUniqueImageName();
         }

@@ -18,9 +18,7 @@ export class UserContainer {
         if (data !== null) {
             const users = Helper.object_to_array_data(data);
             this.#loadUsersTable(users);
-            document.getElementById('fname').value = "";
-            document.getElementById('age').value = "";
-            document.getElementById("profile").value = "";
+            this.#clearInputFields();
         }
     }
 
@@ -29,9 +27,7 @@ export class UserContainer {
         if (data !== null) {
             const users = Helper.object_to_array_data(data);
             this.#loadUsersTable(users);
-            document.getElementById('fname').value = "";
-            document.getElementById('age').value = "";
-            document.getElementById("profile").value = "";
+            this.#clearInputFields();
         } else {
             document.getElementById("customers").innerHTML = "";
         }
@@ -61,9 +57,17 @@ export class UserContainer {
             let age = document.getElementById('upd_age').value;
             let gender = document.getElementById('upd_gender').value;
             let country = document.getElementById('upd_country').value;
+
+            const validationMessage = this.#validateUser(name, age, gender, country);
+            if (validationMessage) {
+                this.#showMessage(validationMessage, 'error');
+                return;
+            }
+
             const updated_user_data = { name, age, gender, country };
             await this.#user_instance.updateUser(this.#db_ref_name, id, updated_user_data);
             this.#refreshUsers();
+            this.#showMessage('User updated successfully', 'success');
         }
         document.getElementById("myModal").style.display = "none";
     }
@@ -74,19 +78,49 @@ export class UserContainer {
         const gender = document.getElementById('gender').value;
         const country = document.getElementById('country').value;
         const profile = document.getElementById("profile");
+
+        const validationMessage = this.#validateUser(name, age, gender, country);
+        if (validationMessage) {
+            this.#showMessage(validationMessage, 'error');
+            return;
+        }
+
         if (profile.files.length > 0) {
             try {
                 await this.#user_instance.createUser(name, age, gender, country, profile, this.#db_ref_name, this.#storage_ref_name);
                 this.#refreshUsers();
-                document.getElementById('fname').value = "";
-                document.getElementById('age').value = "";
-                document.getElementById("profile").value = "";
+                this.#clearInputFields();
+                this.#showMessage('User created successfully', 'success');
             } catch (err) {
-                console.log("Error creating user in container: " + err);
-                throw err;
+                this.#showMessage("Error creating user: " + err.message, 'error');
             }
+        } else {
+            this.#showMessage("Profile picture is required", 'error');
         }
+    }
 
+    #validateUser(name, age, gender, country) {
+        if (!name) return 'Name is required';
+        if (!age || isNaN(age) || age <= 0) return 'Valid age is required';
+        if (!gender) return 'Gender is required';
+        if (!country) return 'Country is required';
+        return null;
+    }
+
+    #showMessage(message, type) {
+        const messageContainer = document.getElementById('message');
+        messageContainer.innerText = message;
+        messageContainer.className = type; // 'success' or 'error'
+        messageContainer.style.display = 'block';
+        setTimeout(() => {
+            messageContainer.style.display = 'none';
+        }, 5000);
+    }
+
+    #clearInputFields() {
+        document.getElementById('fname').value = "";
+        document.getElementById('age').value = "";
+        document.getElementById("profile").value = "";
     }
 
     #loadUsersTable(users) {
